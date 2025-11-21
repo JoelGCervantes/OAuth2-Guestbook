@@ -1,0 +1,23 @@
+use Cloud Build to build the container and publish it in the container registry
+'''
+gcloud builds submit --timeout=900 \
+  --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/gcp_oauth_gb
+'''
+
+deploy the container on Cloud Run as gcp-oauth-gb in us-west1, allowing unauthenticated access
+'''
+gcloud run deploy gcp-oauth-gb \
+  --image gcr.io/${GOOGLE_CLOUD_PROJECT}/gcp_oauth_gb \
+  --service-account guestbook@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com \
+  --region=us-west1 \
+  --allow-unauthenticated
+'''
+
+when the service has been deployed, make a note of its URL. We will need this URL to specify the Callback URL for Google's OAuth provider to redirect users to after authentication and authorization has been performed.
+Service URL: https://...
+callback URL: https://.../callback
+
+
+The application we have deployed needs to be registered on the identity provider in order to support OAuth authentication. To do so, first visit the "APIs & Services"=>"OAuth consent screen" interface from the cloud console and specify a consent screen to use. Choose "External" under User Type, and then fill out the application's information:
+
+ For an external OAuth application, the authorized domain URL specifies the site that the application is hosted on (e.g. as if we were going to deploy the application at https://pdx.edu/guestbook).
